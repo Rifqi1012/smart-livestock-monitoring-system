@@ -51,7 +51,13 @@ export default function BottomNav({ isAdmin }: { isAdmin: boolean }) {
           confirmText="Ya, Keluar"
           cancelText="Batal"
           variant="destructive"
-          onConfirm={() => signOut({ callbackUrl: "/login" })}
+          onConfirm={async () => {
+            // Clear the session server-side, then redirect from the browser so
+            // it uses the real public origin (avoids Auth.js resolving the base
+            // URL to the internal host, e.g. localhost:3010, behind a proxy).
+            await signOut({ redirect: false });
+            window.location.href = "/login";
+          }}
           trigger={
             <button
               aria-label="Keluar"
