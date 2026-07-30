@@ -38,7 +38,9 @@
       "Bash(ipconfig getifaddr *)",
       "Bash(echo \"IP LAN: $\\(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null\\)\")",
       "Bash(ps -o pid,etime,command -ax)",
-      "Bash(node -e \"require.resolve\\('sharp'\\); console.log\\('sharp already installed'\\)\")"
+      "Bash(node -e \"require.resolve\\('sharp'\\); console.log\\('sharp already installed'\\)\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('scripts:',JSON.stringify\\(p.scripts\\)\\); const d={...p.dependencies,...p.devDependencies}; ['next','react','typescript','prisma','@prisma/client','@prisma/adapter-mariadb','next-auth','tailwindcss','web-push','recharts','lucide-react','@radix-ui/react-alert-dialog','sharp','tsx'].forEach\\(k=>console.log\\(k, d[k]||'-'\\)\\)\")",
+      "Bash(git check-ignore *)"
     ]
   }
 }
