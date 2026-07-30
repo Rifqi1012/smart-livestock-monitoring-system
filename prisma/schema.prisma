@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  admin
+  petugas_kandang
+}
+
+model User {
+  id                String             @id @default(cuid())
+  name              String
+  username          String             @unique // login credential (wireframe L01)
+  passwordHash      String
+  role              Role               @default(petugas_kandang)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  pushSubscriptions PushSubscription[]
+}
+
+model Device {
+  id        String   @id @default(cuid())
+  deviceId  String   @unique // e.g. "esp32-barn-01", sent by firmware
+  name      String
+  apiKey    String   @unique // auth for POST /api/device/ingest
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MonitoringData {
+  id            String         @id @default(cuid())
+  suhu          Float
+  kelembapan    Float
+  amonia        Float
+  thi           Float
+  indeksGabungan Float         @default(0) // SAW combined index (IG)
+  statusLevel   Int // 0 normal, 1 waspada, 2 bahaya
+  statusLabel   String // "normal" | "waspada" | "bahaya"
+  createdAt     DateTime       @default(now())
+  notifications Notification[]
+
+  @@index([createdAt])
+}
+
+// Singleton config row. SAW method uses two admin-configurable criteria only.
+model Threshold {
+  id        Int      @id @default(1)
+  thiMax    Float    @default(90) // SAW normalization ceiling for THI
+  amoniaMax Float // SAW normalization ceiling for amonia (also relay trigger)
+  updatedBy String? // name of the admin who last saved
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id               String         @id @default(cuid())
+  monitoringData   MonitoringData @relation(fields: [monitoringDataId], references: [id], onDelete: Cascade)
+  monitoringDataId String
+  statusLabel      String
+  message          String
+  pushStatus       String         @default("pending") // pending | sent | failed
+  deliveryError    String?        @db.Text // error message when a push send fails
+  read             Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+
+  @@index([monitoringDataId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  endpoint  String   @db.Text
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@unique([endpoint(length: 191)])
+  @@index([userId])
+}
