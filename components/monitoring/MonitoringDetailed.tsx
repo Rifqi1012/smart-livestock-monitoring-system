@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { formatTanggalIndo } from "@/lib/format-date";
 import StatusBadge from "@/components/StatusBadge";
 import MetricLineChart, { type MetricPoint } from "@/components/monitoring/MetricLineChart";
+import * as XLSX from "xlsx";
+import { Download } from "lucide-react";
 
 const PAGE_SIZE = 15;
 
@@ -112,6 +114,45 @@ export default function MonitoringDetailed() {
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const handleExportExcel = () => {
+    if (rows.length === 0) return;
+
+    const dataToExport = rows.map((r) => ({
+      Waktu: formatTanggalIndo(r.createdAt),
+      "Suhu (°C)": r.suhu,
+      "Kelembapan (%)": r.kelembapan,
+      "Amonia (ppm)": r.amonia,
+      THI: r.thi,
+      IG: r.indeksGabungan,
+      Status: r.statusLabel,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet([]);
+    
+    XLSX.utils.sheet_add_aoa(ws, [
+      [`Data Monitoring SLMS - Periode: ${fromDate} sampai ${toDate}`],
+      [],
+    ], { origin: "A1" });
+
+    XLSX.utils.sheet_add_json(ws, dataToExport, { origin: "A3" });
+
+    ws["!cols"] = [
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Historis");
+
+    const fileName = `Data_Monitoring_SLMS_${fromDate}_to_${toDate}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
   return (
     <main className="space-y-5 p-4 sm:p-6 lg:p-8">
       <h1 className="text-2xl font-semibold text-[#1F2937]">Monitoring</h1>
@@ -204,7 +245,17 @@ export default function MonitoringDetailed() {
 
           {/* Tabel data historis */}
           <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-lg font-semibold">Data Historis</h2>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Data Historis</h2>
+              <button
+                onClick={handleExportExcel}
+                disabled={rows.length === 0}
+                className="flex items-center gap-2 rounded-md bg-[#10B981] px-3 py-1.5 text-sm font-medium text-white transition hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="h-4 w-4" />
+                Export Excel
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-sm">
                 <thead>

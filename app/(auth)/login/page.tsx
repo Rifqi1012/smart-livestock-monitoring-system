@@ -5,12 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Milk, User, Lock, Eye, EyeOff, Thermometer, Droplets, Wind } from "lucide-react";
 
-// Neumorphic surfaces built on the #F0F0F0 base.
 const RAISED = "shadow-[8px_8px_16px_#c9c9c9,-8px_-8px_16px_#ffffff]";
 const INSET = "shadow-[inset_5px_5px_10px_#d6d6d6,inset_-5px_-5px_10px_#ffffff]";
 
 export default function LoginPage() {
-  // useSearchParams() must be inside a Suspense boundary (Next 16 build rule).
   return (
     <Suspense>
       <LoginForm />
@@ -125,25 +123,6 @@ function LoginForm() {
           {loading ? "Memproses..." : "Masuk"}
         </button>
       </form>
-
-      {/* Decorative sensor tiles (illustrative only) */}
-      {/* <div className="flex gap-4">
-        {[
-          { label: "Suhu", Icon: Thermometer },
-          { label: "Kelembapan", Icon: Droplets },
-          { label: "Amonia", Icon: Wind },
-        ].map(({ label, Icon }) => (
-          <div
-            key={label}
-            className={`flex flex-col items-center gap-2 rounded-2xl bg-[#F0F0F0] px-8 py-5 ${RAISED}`}
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
-              <Icon size={18} className="text-[#10B981]" aria-hidden />
-            </span>
-            <span className="text-sm font-semibold text-[#1F2937]">{label}</span>
-          </div>
-        ))}
-      </div> */}
 
       <p className="text-xs text-[#9CA3AF] text-center">
         © 2026 SMKN 5 Pangalengan — Sistem Monitoring Kandang Sapi Perah
